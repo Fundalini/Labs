@@ -1,0 +1,121 @@
+VMNet 2,
+ VMNet Info: Host-only
+ IP Address: 192.168.30.0
+ Subnet Mask: 255.255.255.0
+ DHCP: Unchecked
+VMNET 3,
+ VMNet Info: Host-only
+ IP Address: 192.168.140.0
+ Subnet Mask: 255.255.255.0
+ DHCP: Unchecked
+VMNET 4,
+ VMNet Info: Host-only
+ IP Address: 192.168.175.0
+ Subnet Mask: 255.255.255.0
+ DHCP: Unchecked
+VMNET 8,
+ VMNet Info: NAT
+ IP Address: 192.168.163.0
+ Subnet Mask: 255.255.255.0
+ DHCP: Checked
+
+VPN-PH,
+ Tunnel IP: 172.16.10.1
+ Tunnel Subnet Mask: 255.255.255.0
+ Source Interface: Gig1
+ Remote Peer IP: 192.168.163.12
+ Pre-Shared Key: C1sc0123
+ Remote Subnets: 20.20.20.0/24
+VPN-JP, 
+ Tunnel IP - 172.16.10.2
+ Tunnel Subnet Mask: 255.255.255.0
+ Source Interface: Gig1
+ Remote Peer IP: 192.168.163.11
+ Pre-Shared Key: C1sc0123
+ Remote Subnets: 10.10.10.0/24
+
+@VPN-PH
+conf t
+ hostname VPN-PH
+ enable secret pass
+ service password-encryption
+ no logging cons
+ no ip domain lookup
+ line vty 0 14
+  transport input all
+  password pass
+  login local
+  exec-timeout 0 0
+ int g1
+  ip add 192.168.163.11 255.255.255.0
+  no shut
+ int g2
+  ip add 192.168.140.11 255.255.255.0
+  no shut
+ int g3
+  ip add 10.10.10.11 255.255.255.0
+  no shut
+ !
+ username admin privilege 15 secret pass
+ ip http server
+ ip http secure-server
+ ip http authentication local
+ end
+wr
+
+
+@VPN-JP
+ 
+
+conf t
+ hostname VPN-JP
+ enable secret pass
+ service password-encryption
+ no logging cons
+ no ip domain lookup
+ line vty 0 14
+  transport input all
+  password pass
+  login local
+  exec-timeout 0 0
+ int g1
+  ip add 192.168.163.12 255.255.255.0
+  no shut
+ int g2
+  ip add 192.168.140.12 255.255.255.0
+  no shut
+ int g3
+  ip add 20.20.20.12 255.255.255.0
+  no shut
+!
+ username admin privilege 15 secret pass
+ ip http server
+ ip http secure-server
+ ip http authentication local
+ end
+wr
+
+
+
+@BLDG-PH
+
+sudo su
+ifconfig eth0 10.10.10.10 netmask 255.255.255.0 up
+route add default gw 10.10.10.11
+ping 10.10.10.11
+
+@BLDG-JP
+sudo su
+ifconfig eth0 20.20.20.20 netmask 255.255.255.0
+route add default gw 20.20.20.12
+ping 20.20.20.12
+
+
+
+
+
+
+
+
+
+
